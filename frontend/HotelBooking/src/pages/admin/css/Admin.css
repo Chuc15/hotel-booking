@@ -1,0 +1,149 @@
+.admin-container {
+    display: flex;
+    font-family: 'DM Sans', sans-serif;
+}
+
+/* SIDEBAR */
+
+.sidebar {
+    width: 240px;
+    background: #1A1510;
+    color: #C9A84C;
+    padding: 20px;
+    position: fixed;
+    display: flex;
+    flex-direction: column;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 240px;
+    height: 100vh;
+}
+.logo {
+    font-size: 20px;
+        font-weight: 600;
+        letter-spacing: 2px;
+        margin-bottom: 30px;
+        text-align: center;
+        color: #fff;
+}
+
+.menu-item {
+    font-family: 'Playfair Display', serif;
+        padding: 12px 16px;
+        margin-bottom: 10px;
+        cursor: pointer;
+        border-radius: 8px;
+    
+        /* Typography */
+        font-size: 14px;
+        font-weight: 500;
+        letter-spacing: 0.5px;
+        color: #2c2c2c;
+    
+        /* Hiệu ứng */
+        transition: all 0.25s ease;
+}
+
+.menu-item:hover {
+    background: linear-gradient(135deg, #C9A84C, #e0c36a);
+        color: #1A1510;
+        transform: translateX(4px);
+}
+
+.menu-item.active {
+    background: #1A1510;
+        color: #C9A84C;
+        font-weight: 600;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+
+/* đẩy logout xuống đáy */
+.logout {
+    
+    margin-top: auto;
+        /* 🔥 QUAN TRỌNG: đẩy xuống đáy */
+    
+        padding: 20px;
+        border-top: 1px solid rgba(255, 255, 255, 0.1);
+        cursor: pointer;
+    
+        font-size: 15px;
+        letter-spacing: 1.25px;
+        color: #C9A84C;
+        transition: 0.25s;
+}
+
+.logout:hover {
+    color: #fff;
+    background: rgba(255, 107, 107, 0.1);
+}
+/* MAIN */
+.main {
+    flex: 1;
+    background: #f5f5f5;
+    display: flex;
+    flex-direction: column;
+    margin-left: 240px;
+}
+
+/* HEADER */
+.header {
+    height: 60px;
+    background: #fff;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0 20px;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+}
+
+/* CONTENT */
+.content {
+    padding: 20px;
+    overflow-y: auto;
+        /* 🔥 scroll ở đây */
+        height: calc(100vh - 60px);
+}
+
+.card {
+    background: #fff;
+    padding: 20px;
+    border-radius: 10px;
+    box-shadow: 0 5px 20px rgba(0, 0, 0, 0.1);
+}
+.grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 20px;
+    color: #333;
+}
+
+.big {
+    font-size: 24px;
+    font-weight: bold;
+}
+
+.table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 20px;
+}
+
+.table th,
+.table td {
+    padding: 12px;
+    border-bottom: 1px solid #ddd;
+    text-align: left;
+}
+
+.table tr:hover {
+    background: #f9f9f9;
+}
+
+button {
+    margin-right: 5px;
+    padding: 6px 10px;
+    cursor: pointer;
+}
