@@ -7,12 +7,28 @@ import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
 import { getRooms } from "../../api/roomApi";
 
+// Local images
+import imgHero from '../../assets/images/hero.jpg';
+import imgRoom1 from '../../assets/images/room1.jpg';
+import imgRoom2 from '../../assets/images/room2.jpg';
+import imgRoom3 from '../../assets/images/room3.jpg';
+import imgRoom4 from '../../assets/images/room4.jpg';
+import imgRoom5 from '../../assets/images/room5.jpg';
+import imgPool from '../../assets/images/service-pool.jpg';
+import imgSpa from '../../assets/images/service-spa.jpg';
+import imgRestaurant from '../../assets/images/service-restaurant.jpg';
+import imgGym from '../../assets/images/service-gym.jpg';
+import imgGallery1 from '../../assets/images/gallery1.jpg';
+import imgGallery2 from '../../assets/images/gallery2.jpg';
+import imgGallery3 from '../../assets/images/gallery3.jpg';
+import imgGallery4 from '../../assets/images/gallery4.jpg';
+
 const defaultImages = [
-  'https://images.unsplash.com/photo-1566665797739-1674de7a421a',
-  'https://images.unsplash.com/photo-1582719478250-c89cae4dc85b',
-  'https://images.unsplash.com/photo-1590490360182-c33d57733427',
-  'https://images.unsplash.com/photo-1631049307264-da0ec9d70304',
-  'https://images.unsplash.com/photo-1578683010236-d716f9a3f461'
+  imgRoom1,
+  imgRoom2,
+  imgRoom3,
+  imgRoom4,
+  imgRoom5,
 ];
 
 export default function HomePage() {
@@ -34,19 +50,36 @@ export default function HomePage() {
       try {
         const data = await getRooms({ page: 1, pageSize: 100 });
         const roomsArray = Array.isArray(data) ? data : data.data || data.items || [];
-        
-        // Lấy tất cả phòng đang "Trống" hoặc "Đang sử dụng" theo ý user 
-        // Thường trang chủ sẽ show các phòng để book, ta ưu tiên hiển thị "Trống"
-        const availableRooms = roomsArray.filter(r => r.status === "Trống");
 
-        const formattedRooms = availableRooms.map((r, index) => ({
+        // Group rooms by type so we show "Room Types" rather than individual rooms
+        const typeMap = {};
+        roomsArray.forEach((r) => {
+          if (!typeMap[r.roomTypeName]) {
+            typeMap[r.roomTypeName] = {
+              ...r,
+              availableCount: r.status === "Trống" ? 1 : 0,
+              totalCount: 1,
+            };
+          } else {
+            if (r.status === "Trống") typeMap[r.roomTypeName].availableCount++;
+            typeMap[r.roomTypeName].totalCount++;
+            // Keep the lowest price for the type
+            if (r.pricePerNight < typeMap[r.roomTypeName].pricePerNight) {
+              typeMap[r.roomTypeName].pricePerNight = r.pricePerNight;
+            }
+          }
+        });
+
+        const formattedRooms = Object.values(typeMap).map((r, index) => ({
           id: r.id,
-          name: `Phòng ${r.number}`,
+          name: r.roomTypeName,
           type: r.roomTypeName,
           price: r.pricePerNight,
           image: defaultImages[index % defaultImages.length],
           maxOccupancy: r.capacity || 2,
+          availableCount: r.availableCount,
         }));
+
         setRooms(formattedRooms);
         setFilteredRooms(formattedRooms);
       } catch (error) {
@@ -108,8 +141,10 @@ export default function HomePage() {
       {/* HERO */}
       <section className="home-hero">
         <img
-          src="https://images.unsplash.com/photo-1551882547-ff40c63fe5fa"
+          src={imgHero}
           className="hero-img"
+          loading="eager"
+          fetchPriority="high"
         />
         <div className="hero-overlay">
           <h1>Luxury Hotel Hanoi</h1>
@@ -203,19 +238,24 @@ export default function HomePage() {
         <h2 className="home-section-title">Các loại phòng</h2>
         <div className="home-hotels-grid">
           {filteredRooms.length ? filteredRooms.map((room, i) => (
-           <div 
-  className="hotel-card" 
-  key={i}
-  onClick={() => navigate('/rooms', {
-    state: { checkIn, checkOut, guests }
-  })}
-  style={{ cursor: "pointer" }}
->
+            <div
+              className="hotel-card"
+              key={i}
+              onClick={() => navigate('/rooms', {
+                state: { checkIn, checkOut, guests }
+              })}
+              style={{ cursor: "pointer" }}
+            >
               <div className="hotel-img">
-                <img src={room.image} alt={room.name} />
+                <img src={room.image} alt={room.name} loading="lazy" />
                 <div className="hotel-overlay">
                   <h3>{room.name}</h3>
-                  <p>{room.price?.toLocaleString("vi-VN")}₫ / đêm</p>
+                  <p>
+                    {/* {room.price?.toLocaleString("vi-VN")}₫ / đêm */}
+                    <span style={{ fontSize: '0.8rem', display: 'block', opacity: 0.8 }}>
+                      {room.availableCount > 0 ? `Còn ${room.availableCount} phòng trống` : 'Hết phòng'}
+                    </span>
+                  </p>
                 </div>
               </div>
             </div>
@@ -245,22 +285,22 @@ export default function HomePage() {
 
         <div className="home-hotels-grid">
           <div className="hotel-card">
-            <img src="https://images.unsplash.com/photo-1542314831-068cd1dbfeeb" />
+            <img src={imgPool} loading="lazy" alt="Hồ bơi" />
             <h3>Hồ bơi</h3>
           </div>
 
           <div className="hotel-card">
-            <img src="https://images.unsplash.com/photo-1551632811-561732d1e306" />
-            <h3>Spa & Massage</h3>
+            <img src={imgSpa} loading="lazy" alt="Spa" />
+            <h3>Spa  Massage</h3>
           </div>
 
           <div className="hotel-card">
-            <img src="https://images.unsplash.com/photo-1555992336-03a23c7b20ee" />
+            <img src={imgRestaurant} loading="lazy" alt="Nhà hàng" />
             <h3>Nhà hàng</h3>
           </div>
 
           <div className="hotel-card">
-            <img src="https://images.unsplash.com/photo-1522708323590-d24dbb6b0267" />
+            <img src={imgGym} loading="lazy" alt="Gym" />
             <h3>Gym</h3>
           </div>
         </div>
@@ -271,10 +311,10 @@ export default function HomePage() {
         <h2 className="home-section-title">Hình ảnh khách sạn</h2>
 
         <div className="home-destinations-grid">
-          <img src="https://images.unsplash.com/photo-1560448204-e02f11c3d0e2" />
-          <img src="https://images.unsplash.com/photo-1578683010236-d716f9a3f461" />
-          <img src="https://images.unsplash.com/photo-1584132967334-10e028bd69f7" />
-          <img src="https://images.unsplash.com/photo-1590490360182-c33d57733427" />
+          <img src={imgGallery1} loading="lazy" alt="Gallery 1" />
+          <img src={imgGallery2} loading="lazy" alt="Gallery 2" />
+          <img src={imgGallery3} loading="lazy" alt="Gallery 3" />
+          <img src={imgGallery4} loading="lazy" alt="Gallery 4" />
         </div>
       </section>
 
@@ -293,7 +333,7 @@ export default function HomePage() {
               { img: 'https://www.vietnambooking.com/wp-content/uploads/2019/05/05.png', title: 'GIẢI THƯỞNG', desc: 'Doanh nghiệp văn hóa' }
             ].map((item, i) => (
               <div className="achievement-item" key={i}>
-                <img src={item.img} />
+                <img src={item.img} loading="lazy" />
                 <h4>{item.title}</h4>
                 <p>{item.desc}</p>
               </div>
@@ -310,18 +350,18 @@ export default function HomePage() {
           </h2>
 
           <div className="press-grid">
-  {[
-    'https://www.vietnambooking.com/wp-content/uploads/2019/08/logo.png',
-    'https://www.vietnambooking.com/wp-content/uploads/2019/03/24_h.png',
-    'https://www.vietnambooking.com/wp-content/uploads/2019/03/tien_phong.png',
-    'https://www.vietnambooking.com/wp-content/uploads/2019/07/thanhnien.png',
-    'https://www.vietnambooking.com/wp-content/uploads/2019/08/vcci-la-gi.png'
-  ].map((logo, i) => (
-    <div className="press-item" key={i}>
-      <img src={logo} alt="press logo" />
-    </div>
-  ))}
-</div>
+            {[
+              'https://www.vietnambooking.com/wp-content/uploads/2019/08/logo.png',
+              'https://www.vietnambooking.com/wp-content/uploads/2019/03/24_h.png',
+              'https://www.vietnambooking.com/wp-content/uploads/2019/03/tien_phong.png',
+              'https://www.vietnambooking.com/wp-content/uploads/2019/07/thanhnien.png',
+              'https://www.vietnambooking.com/wp-content/uploads/2019/08/vcci-la-gi.png'
+            ].map((logo, i) => (
+              <div className="press-item" key={i}>
+                <img src={logo} alt="press logo" loading="lazy" />
+              </div>
+            ))}
+          </div>
         </div>
       </section>
 

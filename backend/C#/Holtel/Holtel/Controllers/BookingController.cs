@@ -96,12 +96,12 @@ namespace Holtel.Controllers
 			await _service.Delete(id);
 			return Ok(new { message = "Deleted successfully" });
 		}
-		//[HttpPatch("{id}/status")]
-		//[Authorize(Roles = "Admin")]
-		//public async Task<IActionResult> UpdateStatus(int id, UpdateBookingStatusDto dto)
-		//{
-		//	await _service.UpdateStatus(id, dto.Status);
-		//	return Ok();
-		//}
+		[HttpPatch("{id}/status")]
+		[Authorize(Roles = "Admin")]
+		public async Task<IActionResult> UpdateStatus(int id, UpdateBookingStatusDto dto)
+		{
+			await _service.UpdateStatus(id, dto.Status);
+			return Ok();
+		}
 	}
 }

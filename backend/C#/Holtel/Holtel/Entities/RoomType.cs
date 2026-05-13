@@ -17,6 +17,6 @@
 		// Navigation
 		public ICollection<Room> Rooms { get; set; } = new List<Room>();
 
-
+		public bool IsDeleted { get; set; } = false;
 	}
 }

@@ -87,9 +87,7 @@ const handleLogout = () => {
 
         {/* Content */}
         <div className="content">
-          <div className="card">
-            {renderContent()}
-          </div>
+          {renderContent()}
         </div>
 
       </div>

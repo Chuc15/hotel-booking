@@ -1,0 +1,222 @@
+/* ============================================================
+   PREMIUM MINIMALIST DASHBOARD
+   Main Theme: Luxury Hotel (Gold & Dark)
+   ============================================================ */
+@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap');
+
+.dashboard-container {
+    padding: 40px;
+    background: #fdfaf5; /* Very soft warm cream */
+    min-height: 100vh;
+    font-family: 'Plus Jakarta Sans', sans-serif;
+    color: #1A1510;
+}
+
+/* ── HEADER ── */
+.dash-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 40px;
+}
+
+.dash-title h1 {
+    font-family: 'Playfair Display', serif;
+    font-size: 2.4rem;
+    margin: 0;
+    letter-spacing: -0.5px;
+}
+
+.dash-title p {
+    color: #8a7d6b;
+    margin: 8px 0 0;
+    font-size: 0.95rem;
+}
+
+/* ── TOP STAT CARDS ── */
+.stats-row {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 24px;
+    margin-bottom: 40px;
+}
+
+.stat-card {
+    background: #fff;
+    padding: 30px;
+    border-radius: 24px;
+    box-shadow: 0 4px 24px rgba(26, 21, 16, 0.03);
+    border: 1px solid rgba(232, 224, 208, 0.5);
+    transition: all 0.3s ease;
+}
+
+.stat-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 12px 32px rgba(201, 168, 76, 0.08);
+    border-color: #C9A84C;
+}
+
+.stat-card .label {
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: #9a8e7d;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    margin-bottom: 20px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.stat-card .value {
+    font-family: 'Playfair Display', serif;
+    font-size: 2.2rem;
+    font-weight: 700;
+    color: #1A1510;
+}
+
+.stat-card .trend {
+    margin-top: 15px;
+    font-size: 0.85rem;
+    font-weight: 700;
+    display: flex;
+    align-items: center;
+    gap: 5px;
+}
+
+.trend.up { color: #10b981; }
+.trend.down { color: #ef4444; }
+
+/* ── MAIN CHART & SIDE ── */
+.main-content-grid {
+    display: grid;
+    grid-template-columns: 1.8fr 1fr;
+    gap: 32px;
+}
+
+.panel-card {
+    background: #fff;
+    border-radius: 32px;
+    padding: 35px;
+    box-shadow: 0 4px 24px rgba(26, 21, 16, 0.03);
+    border: 1px solid rgba(232, 224, 208, 0.5);
+}
+
+.panel-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 30px;
+}
+
+.panel-header h2 {
+    font-family: 'Playfair Display', serif;
+    font-size: 1.4rem;
+    margin: 0;
+}
+
+/* ── RECENT BOOKINGS TABLE ── */
+.data-table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+.data-table th {
+    text-align: left;
+    font-size: 0.75rem;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    color: #9a8e7d;
+    padding-bottom: 15px;
+    border-bottom: 1px solid #f8f5ef;
+}
+
+.data-table td {
+    padding: 18px 0;
+    font-size: 0.9rem;
+    border-bottom: 1px solid #fcfaf8;
+}
+
+.data-table tr:last-child td { border-bottom: none; }
+
+.status-tag {
+    padding: 6px 12px;
+    border-radius: 12px;
+    font-size: 0.75rem;
+    font-weight: 700;
+}
+
+.status-tag.confirmed { background: #d1fae5; color: #065f46; }
+.status-tag.pending { background: #fdf7e3; color: #92400e; }
+
+/* ── TOP CUSTOMERS LIST ── */
+.customer-list {
+    display: flex;
+    flex-direction: column;
+    gap: 24px;
+}
+
+.customer-item {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    padding: 16px;
+    border-radius: 20px;
+    transition: background 0.2s;
+}
+
+.customer-item:hover {
+    background: #fdfaf5;
+}
+
+.customer-avatar {
+    width: 48px;
+    height: 48px;
+    border-radius: 16px;
+    background: #1A1510;
+    color: #C9A84C;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 700;
+    font-size: 1.1rem;
+}
+
+.customer-info { flex: 1; }
+.customer-info h4 { margin: 0; font-size: 0.95rem; font-weight: 700; }
+.customer-info p { margin: 4px 0 0; font-size: 0.8rem; color: #8a7d6b; }
+
+.customer-rev {
+    text-align: right;
+}
+
+.customer-rev .amount {
+    display: block;
+    font-weight: 800;
+    color: #C9A84C;
+    font-size: 1rem;
+}
+
+.customer-rev .count {
+    font-size: 0.75rem;
+    color: #9a8e7d;
+}
+
+/* ── CHART PLACEHOLDER ── */
+.chart-area {
+    height: 300px;
+    width: 100%;
+    position: relative;
+    margin-top: 20px;
+}
+
+/* ── LOADING ── */
+.dash-loading-wrap {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: 100vh;
+    font-family: 'Playfair Display', serif;
+    font-size: 1.5rem;
+    color: #C9A84C;
+}

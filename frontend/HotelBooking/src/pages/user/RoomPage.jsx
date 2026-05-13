@@ -5,12 +5,19 @@ import Footer from '../../components/layout/Footer';
 import '../../pages/AuthPages.css';
 import { getRooms } from '../../api/roomApi';
 
+// Local images (consistent with HomePage)
+import imgRoom1 from '../../assets/images/room1.jpg';
+import imgRoom2 from '../../assets/images/room2.jpg';
+import imgRoom3 from '../../assets/images/room3.jpg';
+import imgRoom4 from '../../assets/images/room4.jpg';
+import imgRoom5 from '../../assets/images/room5.jpg';
+
 const defaultImages = [
-  'https://images.unsplash.com/photo-1631049307264-da0ec9d70304?w=800',
-  'https://images.unsplash.com/photo-1590490360182-c33d57733427?w=800',
-  'https://images.unsplash.com/photo-1582719478250-c89cae4dc85b?w=800',
-  'https://images.unsplash.com/photo-1611892440504-42a792e24d32?w=800',
-  'https://images.unsplash.com/photo-1566665797739-1674de7a421a?w=800'
+  imgRoom1,
+  imgRoom2,
+  imgRoom3,
+  imgRoom4,
+  imgRoom5,
 ];
 
 export default function RoomPage() {
@@ -26,13 +33,9 @@ export default function RoomPage() {
         setLoading(true);
         const data = await getRooms({ page: 1, pageSize: 100 });
         const roomsArray = Array.isArray(data) ? data : data.data || data.items || [];
-        
-        // Filter out rooms that are not "Trống" if you only want available rooms
-        // But the user said "những phòng đang sử dụng", so let's show all or just "Trống"
-        // Usually users can only book "Trống" rooms.
-        const availableRooms = roomsArray.filter(r => r.status === "Trống");
 
-        const formattedRooms = availableRooms.map((r, i) => ({
+        // Show all rooms regardless of status as requested
+        const formattedRooms = roomsArray.map((r, i) => ({
           id: r.id,
           name: `Phòng ${r.number}`,
           type: r.roomTypeName || 'Tiêu chuẩn',
@@ -45,12 +48,13 @@ export default function RoomPage() {
             defaultImages[(i + 3) % defaultImages.length]
           ],
           description: `Phòng ${r.number} - Tầng ${r.floor}. Tình trạng: ${r.status}.`,
-          amenities: r.amenities ? r.amenities.split(',').map(a => a.trim()) : ['WiFi', 'Air Conditioning'],
+          amenities: Array.isArray(r.amenities) ? r.amenities : (typeof r.amenities === 'string' ? r.amenities.split(',').map(a => a.trim()) : ['WiFi', 'Air Conditioning']),
           size: `${r.area || 30}m²`,
           capacity: r.capacity || 2,
           capacityText: `${r.capacity || 2} người`,
           bed: r.bedType || '1 giường lớn',
-          available: 1, // physical room
+          available: r.status === "Trống" ? 1 : 0,
+          status: r.status,
           hasBuffet: true
         }));
         setRooms(formattedRooms);
@@ -81,7 +85,7 @@ export default function RoomPage() {
   return (
     <div className="home-wrap">
       <Header />
-      
+
       {/* Page Header */}
       <section className="mt-page-header">
         <h1>Danh Sách Phòng</h1>
@@ -98,54 +102,54 @@ export default function RoomPage() {
         ) : (
           <div className="mt-room-grid">
             {filteredRooms.map((room) => (
-  <div 
-    key={room.id} 
-    className="mt-room-card"
-    onClick={() => handleViewRoom(room)} // 👈 click cả card
-  >
-    <div className="mt-room-image">
-      <img src={room.image} alt={room.name} />
-      <div className="mt-room-badge">{room.type}</div>
-      <div className="mt-room-available">
-        Còn {room.available} phòng
-      </div>
-    </div>
+              <div
+                key={room.id}
+                className="mt-room-card"
+                onClick={() => handleViewRoom(room)} // 👈 click cả card
+              >
+                <div className="mt-room-image">
+                  <img src={room.image} alt={room.name} />
+                  <div className="mt-room-badge">{room.type}</div>
+                  <div className={`mt-room-status-badge ${room.status === "Trống" ? "status-available" : "status-occupied"}`}>
+                    {room.status === "Trống" ? "Còn phòng" : "Hết phòng"}
+                  </div>
+                </div>
 
-    <div className="mt-room-content">
-      <h3>{room.name}</h3>
-      <p className="mt-room-description">{room.description}</p>
+                <div className="mt-room-content">
+                  <h3>{room.name}</h3>
+                  <p className="mt-room-description">{room.description}</p>
 
-      <div className="mt-room-details">
-        <div className="mt-room-detail">
-          <span>📐</span> {room.size}
-        </div>
-        <div className="mt-room-detail">
-          <span>👥</span> {room.capacity}
-        </div>
-        <div className="mt-room-detail">
-          <span>🛏️</span> {room.bed}
-        </div>
-      </div>
+                  <div className="mt-room-details">
+                    <div className="mt-room-detail">
+                      <span>📐</span> {room.size}
+                    </div>
+                    <div className="mt-room-detail">
+                      <span>👥</span> {room.capacity}
+                    </div>
+                    <div className="mt-room-detail">
+                      <span>🛏️</span> {room.bed}
+                    </div>
+                  </div>
 
-      <div className="mt-room-amenities">
-        {room.amenities.slice(0, 4).map((amenity, index) => (
-          <span key={index} className="mt-amenity-tag">{amenity}</span>
-        ))}
-        {room.amenities.length > 4 && (
-          <span className="mt-amenity-more">+{room.amenities.length - 4}</span>
-        )}
-      </div>
+                  <div className="mt-room-amenities">
+                    {room.amenities.slice(0, 4).map((amenity, index) => (
+                      <span key={index} className="mt-amenity-tag">{amenity}</span>
+                    ))}
+                    {room.amenities.length > 4 && (
+                      <span className="mt-amenity-more">+{room.amenities.length - 4}</span>
+                    )}
+                  </div>
 
-      <div className="mt-room-footer">
-        <div className="mt-room-price">
-          <span className="mt-price-label">Giá từ</span>
-          <span className="mt-price-value">{formatPrice(room.price)}</span>
-          <span className="mt-price-unit">/đêm</span>
-        </div>
-      </div>
-    </div>
-  </div>
-))}
+                  <div className="mt-room-footer">
+                    <div className="mt-room-price">
+                      <span className="mt-price-label">Giá từ</span>
+                      <span className="mt-price-value">{formatPrice(room.price)}</span>
+                      <span className="mt-price-unit">/đêm</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            ))}
           </div>
         )}
       </section>

@@ -11,7 +11,7 @@
 		public decimal TotalPrice { get; set; }
 		public string Status { get; set; } = "Pending"; // Pending/Confirmed/Cancelled
 		public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
-
+		public bool IsDeleted { get; set; } = false;
 		public User User { get; set; } = null!;
 		public Room Room { get; set; } = null!;
 		public ICollection<Payment> Payments { get; set; } = new List<Payment>();

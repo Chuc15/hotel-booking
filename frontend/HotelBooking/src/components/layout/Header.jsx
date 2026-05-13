@@ -12,11 +12,11 @@ export default function Header() {
 
         <div className="home-nav-logo">
           <div
-             className="home-logo"
-         onClick={() => navigate('/')}
+            className="home-logo"
+            onClick={() => navigate('/')}
           >
-         
-        <span className="text">Grand Hotel</span>
+
+            <span className="text">Grand Hotel</span>
           </div>
         </div>
 
@@ -24,8 +24,8 @@ export default function Header() {
         <div className="home-nav-links">
           <Link to="/">Trang chủ</Link>
           <Link to="/about">Giới thiệu</Link>
-          <Link to="/">Ưu đãi</Link>
-          
+          <Link to="/rooms">Phòng nghỉ</Link>
+          <Link to="/review">Đánh giá</Link>
           <Link to="/contact">Liên hệ</Link>
         </div>
 

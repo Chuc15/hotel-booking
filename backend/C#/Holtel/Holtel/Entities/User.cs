@@ -12,7 +12,7 @@ namespace Holtel.Model
 		public string Role { get; set; } = null!;
 		public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
 		public bool IsActive { get; set; } = true;
-
+		public bool IsDeleted { get; set; } = false;
 		public DateTime? UpdatedAt { get; set; }
 		// Navigation
 		public ICollection<Review> Reviews { get; set; } = new List<Review>();

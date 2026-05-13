@@ -66,6 +66,9 @@ namespace Holtel.Migrations
                     b.Property<int>("GuestCount")
                         .HasColumnType("int");
 
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("bit");
+
                     b.Property<int>("RoomId")
                         .HasColumnType("int");
 
@@ -154,6 +157,9 @@ namespace Holtel.Migrations
                         .HasColumnType("datetime2")
                         .HasDefaultValueSql("GETUTCDATE()");
 
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("bit");
+
                     b.Property<int>("Rating")
                         .HasColumnType("int");
 
@@ -196,6 +202,9 @@ namespace Holtel.Migrations
 
                     b.Property<int>("Floor")
                         .HasColumnType("int");
+
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("bit");
 
                     b.Property<string>("Number")
                         .IsRequired()
@@ -240,6 +249,9 @@ namespace Holtel.Migrations
                         .HasMaxLength(500)
                         .HasColumnType("nvarchar(500)");
 
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("bit");
+
                     b.Property<int>("MaxOccupancy")
                         .HasColumnType("int");
 
@@ -275,6 +287,9 @@ namespace Holtel.Migrations
                     b.Property<bool>("IsActive")
                         .HasColumnType("bit");
 
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("bit");
+
                     b.Property<string>("PasswordHash")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
@@ -297,11 +312,12 @@ namespace Holtel.Migrations
                         new
                         {
                             Id = 1,
-                            CreatedAt = new DateTime(2026, 5, 3, 3, 54, 52, 756, DateTimeKind.Utc).AddTicks(2380),
+                            CreatedAt = new DateTime(2026, 5, 12, 16, 8, 27, 903, DateTimeKind.Utc).AddTicks(5835),
                             Email = "admin@gmail.com",
                             FullName = "Admin",
                             IsActive = true,
-                            PasswordHash = "$2a$11$8/lVEASdTPJoWGTSltLBc.Nh58rG3Vyf35Mog5t0iD4FP/hZHgd5a",
+                            IsDeleted = false,
+                            PasswordHash = "$2a$11$pklXfwYbx98B2VfEmp.G/.NiNBk5Gvp4nI9XvL8YaYOns/wr7Q8Bm",
                             PhoneNumber = "0123456789",
                             Role = "Admin"
                         });

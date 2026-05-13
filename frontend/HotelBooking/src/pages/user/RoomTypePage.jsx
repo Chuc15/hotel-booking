@@ -25,9 +25,9 @@ export default function RoomTypePage() {
       try {
         const data = await getRooms({ page: 1, pageSize: 100 });
         const roomsArray = Array.isArray(data) ? data : data.data || data.items || [];
-        const availableRooms = roomsArray.filter(r => r.status === "Trống");
+        // Removed status filter to show all rooms as requested
 
-        const formattedRooms = availableRooms.map((r, i) => ({
+        const formattedRooms = roomsArray.map((r, i) => ({
           id: r.id,
           name: `Phòng ${r.number}`,
           type: r.roomTypeName || 'Tiêu chuẩn',
@@ -40,7 +40,7 @@ export default function RoomTypePage() {
             defaultImages[(i + 3) % defaultImages.length]
           ],
           description: `Phòng ${r.number} - Tầng ${r.floor}. Tình trạng: ${r.status}.`,
-          amenities: r.amenities ? r.amenities.split(',').map(a => a.trim()) : ['WiFi', 'Air Conditioning'],
+          amenities: Array.isArray(r.amenities) ? r.amenities : (typeof r.amenities === 'string' ? r.amenities.split(',').map(a => a.trim()) : ['WiFi', 'Air Conditioning']),
           size: `${r.area || 30}m²`,
           capacity: r.capacity || 2,
           capacityText: `${r.capacity || 2} người`,

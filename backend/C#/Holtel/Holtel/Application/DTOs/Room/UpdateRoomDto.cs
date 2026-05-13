@@ -9,7 +9,7 @@
 		public string? BedType { get; set; }
 		public double? Area { get; set; }
 		public decimal? PricePerNight { get; set; }
-		public string? Amenities { get; set; }
+		public string Amenities { get; set; } = "";
 		public string? Status { get; set; }
 	}
 }

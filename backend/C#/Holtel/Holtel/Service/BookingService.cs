@@ -73,8 +73,8 @@ namespace Holtel.Service
 		// ================= CREATE =================
 		public async Task<BookingResponseDto> Create(int userId, CreateBookingDto dto)
 		{
-			if (dto.CheckIn >= dto.CheckOut)
-				throw new Exception("Ngày không hợp lệ");
+			if (dto.CheckIn.Date >= dto.CheckOut.Date)
+				throw new Exception("Check-out phải sau check-in");
 
 			var room = await _context.Rooms
 				.Include(r => r.RoomType)
@@ -126,8 +126,8 @@ namespace Holtel.Service
 			if (booking == null)
 				throw new Exception("Booking không tồn tại");
 
-			if (dto.CheckIn >= dto.CheckOut)
-				throw new Exception("Ngày không hợp lệ");
+			if (dto.CheckIn.Date >= dto.CheckOut.Date)
+				throw new Exception("Check-out phải sau check-in");
 
 			var conflict = await _context.Bookings.AnyAsync(b =>
 				b.RoomId == booking.RoomId &&
@@ -182,6 +182,35 @@ namespace Holtel.Service
 				TotalPrice = b.TotalPrice,
 				Status = b.Status
 			};
+		}
+		public async Task UpdateStatus(int id, string status)
+		{
+			var booking = await _context.Bookings.FindAsync(id);
+
+			if (booking == null)
+				throw new Exception("Booking không tồn tại");
+
+			// ✅ validate status hợp lệ
+			var validStatuses = new[] { "Pending", "Confirmed", "Cancelled", "Completed" };
+
+			if (string.IsNullOrEmpty(status) || !validStatuses.Contains(status))
+				throw new Exception("Trạng thái không hợp lệ");
+
+			// ❗ tránh update vô nghĩa
+			if (booking.Status == status)
+				throw new Exception("Trạng thái không thay đổi");
+
+			// ❗ rule thực tế (rất nên có)
+			if (booking.Status == "Cancelled")
+				throw new Exception("Booking đã bị huỷ, không thể cập nhật");
+
+			if (booking.Status == "Completed")
+				throw new Exception("Booking đã hoàn thành, không thể cập nhật");
+
+			booking.Status = status;
+			booking.UpdatedAt = DateTime.UtcNow;
+
+			await _context.SaveChangesAsync();
 		}
 	}
 }

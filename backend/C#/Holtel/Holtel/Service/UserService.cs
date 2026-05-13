@@ -132,14 +132,21 @@ namespace Holtel.Service
 		}
 		[HttpDelete("{id}")]
 		[Authorize(Roles = "Admin")]
-		public async Task DeleteUser(int id)
+		public async Task<bool> DeleteUser(int id)
 		{
 			var user = await _db.Users.FindAsync(id);
-			if (user == null)
-				throw new Exception("Không tìm thấy người dùng");
 
-			_db.Users.Remove(user);
+			if (user == null)
+			{
+				return false;
+			}
+
+			user.IsDeleted = true;
+			user.UpdatedAt = DateTime.UtcNow;
+
 			await _db.SaveChangesAsync();
+
+			return true;
 		}
 
 	}

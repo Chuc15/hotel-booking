@@ -20,14 +20,6 @@ export const updateRoom = async (id, dto) => {
   return response.data;
 };
 
-export const deleteRoom = async (id) => {
-  await axiosInstance.delete(`/rooms/${id}`);
-};
 export const deleteRoomApi = async (id) => {
   await axiosInstance.delete(`/rooms/${id}`);
-};
-
-export const changeStatusApi = async (id, data) => {
-  const res = await axiosInstance.patch(`/rooms/${id}/status`, data);
-  return res.data;
 };

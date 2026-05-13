@@ -13,6 +13,10 @@ import RoomTypePage from "./pages/user/RoomTypePage";
 import RoomPage from "./pages/user/RoomPage";
 import ContactPage from "./pages/shared/ContactPage";
 import AdminLayout from "./pages/admin/AdminLayout";
+import PaymentResult from "./pages/admin/PaymentResult";
+
+
+
 
 function App() {
   return (
@@ -30,6 +34,7 @@ function App() {
           <Route path="/about" element={<AboutPage />} />
           <Route path="/roomtype" element={<RoomTypePage />} />
           <Route path="/contact" element={<ContactPage />} />
+          <Route path="/payment-result" element={<PaymentResult />} />
         </Routes>
       </BrowserRouter>
     </AuthProvider>

@@ -25,17 +25,13 @@ const FOOTER_LINKS = {
     { label: "Điều khoản sử dụng", href: "/" },
   ],
 
-  "Khám phá": [
-    { label: "Địa điểm du lịch", href: "/" },
-    { label: "Blog du lịch", href: "/" },
-    { label: "Ưu đãi & khuyến mãi", href: "/promotions" },
-  ],
+
 };
 
 const SOCIAL_LINKS = [
   {
     name: "Facebook",
-    href: "#",
+    href: "",
     icon: (
       <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor">
         <path d="M18 2h-3a5 5 0 0 0-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 0 1 1-1h3z" />
@@ -44,7 +40,7 @@ const SOCIAL_LINKS = [
   },
   {
     name: "Instagram",
-    href: "#",
+    href: "",
     icon: (
       <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
         <rect x="2" y="2" width="20" height="20" rx="5" ry="5" />
@@ -55,7 +51,7 @@ const SOCIAL_LINKS = [
   },
   {
     name: "TikTok",
-    href: "#",
+    href: "",
     icon: (
       <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor">
         <path d="M19.59 6.69a4.83 4.83 0 0 1-3.77-4.25V2h-3.45v13.67a2.89 2.89 0 0 1-2.88 2.5 2.89 2.89 0 0 1-2.89-2.89 2.89 2.89 0 0 1 2.89-2.89c.28 0 .54.04.79.1V9.01a6.3 6.3 0 0 0-.79-.05 6.34 6.34 0 0 0-6.34 6.34 6.34 6.34 0 0 0 6.34 6.34 6.34 6.34 0 0 0 6.33-6.34V8.69a8.18 8.18 0 0 0 4.78 1.52V6.75a4.85 4.85 0 0 1-1.01-.06z" />
@@ -64,7 +60,7 @@ const SOCIAL_LINKS = [
   },
   {
     name: "YouTube",
-    href: "#",
+    href: "",
     icon: (
       <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor">
         <path d="M22.54 6.42a2.78 2.78 0 0 0-1.95-1.96C18.88 4 12 4 12 4s-6.88 0-8.59.46A2.78 2.78 0 0 0 1.46 6.42 29 29 0 0 0 1 12a29 29 0 0 0 .46 5.58 2.78 2.78 0 0 0 1.95 1.96C5.12 20 12 20 12 20s6.88 0 8.59-.46a2.78 2.78 0 0 0 1.96-1.96A29 29 0 0 0 23 12a29 29 0 0 0-.46-5.58z" />
@@ -87,7 +83,7 @@ const PAYMENT_METHODS = [
 
 // ─── Sub-components ──────────────────────────────────────────────────────────
 
-   
+
 
 function FooterNav() {
   return (
@@ -110,58 +106,81 @@ function FooterNav() {
   );
 }
 
+function FooterMap() {
+  return (
+    <div style={styles.mapContainer}>
+      <h3 style={styles.navHeading}>Vị trí của chúng tôi</h3>
+      <div style={styles.mapWrapper}>
+        <iframe
+          src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3723.9244039110486!2d105.84274731540224!3d21.031707985994824!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x3135ab95333203c5%3A0xba3695596a304321!2zMTIzIFRy4bqnbiBQaMO6LCBEaeG7hW4gQmnDqm4sIEJhIMSQw6xuaCwgSMOgIE7hu5lpLCBWaeG7h3QgTmFt!5e0!3m2!1svi!2s!4v1651912345678!5m2!1svi!2s"
+          width="100%"
+          height="160"
+          style={{ border: 0, borderRadius: "12px", filter: "grayscale(0.4) invert(0.9) contrast(1.2)" }}
+          allowFullScreen=""
+          loading="lazy"
+          referrerPolicy="no-referrer-when-downgrade"
+          title="Hotel Location"
+        ></iframe>
+        <p style={styles.mapAddress}>
+          📍 123 Trần Phú, Quận Hoàn Kiếm, Hà Nội
+        </p>
+      </div>
+    </div>
+  );
+}
+
 function FooterBrand() {
   return (
     <div style={styles.brandCol}>
-  {/* Logo */}
-  <div style={styles.logo}>
-    <span style={styles.logoText}>Grand Hotel</span>
-    <span style={styles.logoIcon}>🏨</span>
-  </div>
+      {/* Logo */}
+      <div style={styles.logo}>
+        <span style={styles.logoText}>Grand Hotel</span>
+        <span style={styles.logoIcon}>🏨</span>
+      </div>
 
-  {/* Certification / Trust */}
-  <div style={styles.badges}>
-    {["3★ Standard", "Đã đăng ký kinh doanh", "An toàn & sạch sẽ"].map((b) => (
-      <div key={b} style={styles.badge}>{b}</div>
-    ))}
-  </div>
+      {/* Certification / Trust */}
+      <div style={styles.badges}>
+        {["3★ Standard", "Đã đăng ký kinh doanh", "An toàn & sạch sẽ"].map((b) => (
+          <div key={b} style={styles.badge}>{b}</div>
+        ))}
+      </div>
 
-  {/* Contact quick */}
-  <div style={styles.contactBox}>
-    <p>📍 123 Phố Cổ, Hà Nội</p>
-    <p>📞 0123 456 789</p>
-    <p>✉️ info@grandhotel.com</p>
-  </div>
+      {/* Contact quick */}
+      <div style={styles.contactBox}>
+        <p>📍 123 Phố Cổ, Hà Nội</p>
+        <p>📞 0123 456 789</p>
+        <p>✉️ info@grandhotel.com</p>
+      </div>
 
-  {/* CTA */}
-  <a href="/rooms" style={styles.partnerBtn}>
-    Đặt phòng ngay 🛎️
-  </a>
+      {/* CTA */}
+      <a href="/rooms" style={styles.partnerBtn}>
+        Đặt phòng ngay 🛎️
+      </a>
 
-  {/* Social */}
-  <div style={styles.socialSection}>
-    <p style={styles.socialLabel}>Kết nối với chúng tôi</p>
-    <div style={styles.socialRow}>
-      {SOCIAL_LINKS.map((s) => (
-        <a key={s.name} href={s.href} style={styles.socialLink} title={s.name}>
-          {s.icon}
-        </a>
-      ))}
-    </div>
-  </div>
-
-  {/* Payments */}
-  <div>
-    <p style={styles.socialLabel}>Thanh toán hỗ trợ</p>
-    <div style={styles.paymentGrid}>
-      {PAYMENT_METHODS.map((p) => (
-        <div key={p.name} style={{ ...styles.paymentCard, background: p.bg }}>
-          <span style={styles.paymentLabel}>{p.logo}</span>
+      {/* Social */}
+      <div style={styles.socialSection}>
+        <p style={styles.socialLabel}>Kết nối với chúng tôi</p>
+        <div style={styles.socialRow}>
+          {SOCIAL_LINKS.map((s) => (
+            <a key={s.name} href={s.href} style={styles.socialLink} title={s.name}>
+              {s.icon}
+            </a>
+          ))}
         </div>
-      ))}
+      </div>
+
+      {/* Payments */}
+      <div>
+        <p style={styles.socialLabel}>Thanh toán hỗ trợ</p>
+        <div style={styles.paymentGrid}>
+          {PAYMENT_METHODS.map((p) => (
+            <div key={p.name} style={{ ...styles.paymentCard, background: p.bg }}>
+              <span style={styles.paymentLabel}>{p.logo}</span>
+            </div>
+          ))}
+        </div>
+      </div>
     </div>
-  </div>
-</div>
   );
 }
 
@@ -170,12 +189,15 @@ function FooterBrand() {
 export default function Footer() {
   return (
     <footer style={styles.footer}>
-      
+
 
       <div style={styles.mainSection}>
         <div style={styles.mainInner}>
           <FooterBrand />
-          <FooterNav />
+          <div style={styles.rightContent}>
+            <FooterNav />
+            <FooterMap />
+          </div>
         </div>
       </div>
 
@@ -188,32 +210,32 @@ export default function Footer() {
             </p>
           </div>
           <div style={styles.storeLinks}>
-  {/* App Store */}
-  <a
-    href="https://apps.apple.com/vn/app/190-booking-%C4%91%E1%BA%B7t-v%C3%A9-m%C3%A1y-bay/id6739488358"
-    style={styles.storeBtn}
-    target="_blank"
-  >
-    <img
-      src="https://data.190booking.com/assets/img/menu/AppStore.svg"
-      alt="App Store"
-      style={styles.storeImg}
-    />
-  </a>
+            {/* App Store */}
+            <a
+              href="https://apps.apple.com/vn/app/190-booking-%C4%91%E1%BA%B7t-v%C3%A9-m%C3%A1y-bay/id6739488358"
+              style={styles.storeBtn}
+              target="_blank"
+            >
+              <img
+                src="https://data.190booking.com/assets/img/menu/AppStore.svg"
+                alt="App Store"
+                style={styles.storeImg}
+              />
+            </a>
 
-  {/* Google Play */}
-  <a
-    href="https://play.google.com/store/apps/details?id=com.vietnambooking.booking"
-    style={styles.storeBtn}
-    target="_blank"
-  >
-    <img
-      src="https://data.190booking.com/assets/img/menu/GooglePlay.svg"
-      alt="Google Play"
-      style={styles.storeImg}
-    />
-  </a>
-</div>
+            {/* Google Play */}
+            <a
+              href="https://play.google.com/store/apps/details?id=com.vietnambooking.booking"
+              style={styles.storeBtn}
+              target="_blank"
+            >
+              <img
+                src="https://data.190booking.com/assets/img/menu/GooglePlay.svg"
+                alt="Google Play"
+                style={styles.storeImg}
+              />
+            </a>
+          </div>
         </div>
       </div>
 
@@ -422,29 +444,29 @@ const styles = {
     maxWidth: 580,
   },
   storeImg: {
-  height: "40px",
-  objectFit: "contain",
-},
- storeBtn: {
-  display: "inline-flex",
-  alignItems: "center",
-  gap: "10px",
+    height: "40px",
+    objectFit: "contain",
+  },
+  storeBtn: {
+    display: "inline-flex",
+    alignItems: "center",
+    gap: "10px",
 
-  padding: "10px 16px",
-  borderRadius: "12px",
+    padding: "10px 16px",
+    borderRadius: "12px",
 
-  background: "#000",          // nền đen chuẩn App Store
-  color: "#fff",
+    background: "#000",          // nền đen chuẩn App Store
+    color: "#fff",
 
-  textDecoration: "none",
-  fontSize: "13px",
-  fontWeight: "600",
+    textDecoration: "none",
+    fontSize: "13px",
+    fontWeight: "600",
 
-  border: "1px solid rgba(255,255,255,0.2)",
+    border: "1px solid rgba(255,255,255,0.2)",
 
-  transition: "all 0.25s ease",
-  cursor: "pointer"
-},
+    transition: "all 0.25s ease",
+    cursor: "pointer"
+  },
   storeBtnHover: {
     background: "rgba(255,255,255,0.16)",
   },
@@ -575,6 +597,35 @@ const styles = {
     gridTemplateColumns: "repeat(3, 1fr)",
     gap: "32px 24px",
     minWidth: 0,
+  },
+
+  rightContent: {
+    flex: 1,
+    display: "flex",
+    flexDirection: "column",
+    gap: 40,
+  },
+
+  // Map section
+  mapContainer: {
+    display: "flex",
+    flexDirection: "column",
+    gap: 16,
+    borderTop: "1px solid rgba(255,255,255,0.05)",
+    paddingTop: 32,
+  },
+  mapWrapper: {
+    position: "relative",
+    overflow: "hidden",
+    borderRadius: 12,
+    border: "1px solid rgba(255,255,255,0.1)",
+    maxWidth: 600,
+  },
+  mapAddress: {
+    fontSize: 13,
+    color: "rgba(255,255,255,0.7)",
+    marginTop: 10,
+    lineHeight: 1.5,
   },
   navHeading: {
     fontSize: 13,

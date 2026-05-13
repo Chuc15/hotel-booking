@@ -56,9 +56,20 @@ namespace Holtel.Controllers
 		[Authorize(Roles = "Admin")]
 		public async Task<IActionResult> DeleteUser(int id)
 		{
-			// Bạn cần viết thêm hàm DeleteUserAsync trong UserService nhé
-			await _userService.DeleteUser(id);
-			return Ok(new { message = "Đã xóa người dùng thành công" });
+			var result = await _userService.DeleteUser(id);
+
+			if (!result)
+			{
+				return NotFound(new
+				{
+					message = "Không tìm thấy người dùng"
+				});
+			}
+
+			return Ok(new
+			{
+				message = "Đã xóa người dùng thành công"
+			});
 		}
 		[HttpPut("{id}/role")]
 		[Authorize(Roles = "Admin")]

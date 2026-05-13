@@ -48,7 +48,7 @@ namespace Holtel
 			builder.Services.AddScoped<IRoomService, RoomService>();
 			builder.Services.AddScoped<IRoomTypeService, RoomTypeService>();
 			builder.Services.AddAutoMapper(typeof(AutoMapperProfile));
-			//builder.Services.AddFluentValidationAutoValidation();
+			builder.Services.AddScoped<IPaymentService, PaymentService>();	
 			builder.Services.AddScoped<IUserService, UserService>();
 
 			builder.Services.AddControllers();

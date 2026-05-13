@@ -1,6 +1,15 @@
 import { useState, useRef, useEffect } from "react";
 import { createRoom, updateRoom, deleteRoomApi, getRooms } from "../../api/roomApi";
 import { getRoomTypes } from "../../api/roomTypeApi";
+
+// Local images for consistency
+import imgRoom1 from '../../assets/images/room1.jpg';
+import imgRoom2 from '../../assets/images/room2.jpg';
+import imgRoom3 from '../../assets/images/room3.jpg';
+import imgRoom4 from '../../assets/images/room4.jpg';
+import imgRoom5 from '../../assets/images/room5.jpg';
+
+const defaultImages = [imgRoom1, imgRoom2, imgRoom3, imgRoom4, imgRoom5];
 const emptyForm = { name: "", roomTypeId: "", floor: "", capacity: "", bed: "", area: "", price: "", status: "Trống", amenities: "" };
 
 const ALL_STATUSES = ["Trống", "Đang sử dụng", "Bảo trì", "Dọn dẹp"];
@@ -70,12 +79,22 @@ function StatusDropdown({ roomId, currentStatus, onChangeStatus }) {
 function RoomCard({ room, onDelete, onEdit, onChangeStatus }) {
   const showAmenities = room.amenities.slice(0, 3);
   const extra = room.amenities.length - 3;
+  const roomImg = defaultImages[room.id % defaultImages.length] || imgRoom1;
+
   return (
-    <div style={{ background: "#fff", borderRadius: 16, border: "1.5px solid #e8e0d0", padding: 20, display: "flex", flexDirection: "column" }}>
-      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: 4 }}>
-        <span style={{ fontSize: 17, fontWeight: 800, color: "#1a1510" }}>{room.name}</span>
-        <StatusBadge status={room.status} />
+    <div style={{ background: "#fff", borderRadius: 16, border: "1.5px solid #e8e0d0", padding: 0, display: "flex", flexDirection: "column", overflow: "hidden" }}>
+      <div style={{ width: "100%", height: 160, overflow: "hidden" }}>
+        <img 
+          src={roomImg} 
+          alt={room.name} 
+          style={{ width: "100%", height: "100%", objectFit: "cover" }} 
+        />
       </div>
+      <div style={{ padding: 20 }}>
+        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: 4 }}>
+          <span style={{ fontSize: 17, fontWeight: 800, color: "#1a1510" }}>{room.name}</span>
+          <StatusBadge status={room.status} />
+        </div>
       <div style={{ fontSize: 12, color: "#7a6e62", marginBottom: 14 }}>{room.type}</div>
       <div style={{ display: "flex", flexDirection: "column", gap: 6, marginBottom: 14 }}>
         {[["Tầng:", room.floor], ["Sức chứa:", room.capacity], ["Loại giường:", room.bed], ["Diện tích:", room.area]].map(([label, val]) => (
@@ -100,6 +119,7 @@ function RoomCard({ room, onDelete, onEdit, onChangeStatus }) {
         <button onClick={() => onDelete(room.id)} style={{ background: "none", border: "none", cursor: "pointer", fontSize: 17, padding: "6px 8px", borderRadius: 7 }}>🗑</button>
       </div>
     </div>
+  </div>
   );
 }
 
@@ -164,6 +184,17 @@ function Modal({ open, onClose, onSave, form, setForm, editMode, errors, roomTyp
           {field("Diện tích (m²)", "area", "number", "VD: 25", "1")}
           {field("Giá / đêm (đ)", "price", "number", "VD: 2800000", "0")}
           {selectField("Trạng thái", "status", ALL_STATUSES)}
+          <div style={{ gridColumn: "span 2" }}>
+            <label style={{ display: "block", fontSize: 12.5, fontWeight: 600, color: errors.amenities ? "#ef4444" : "#7a6e62", marginBottom: 5 }}>Tiện nghi (phân cách bằng dấu phẩy)</label>
+            <input
+              type="text"
+              value={form.amenities || ""}
+              onChange={e => setForm(f => ({ ...f, amenities: e.target.value }))}
+              placeholder="VD: Wifi tốc độ cao, Smart TV, Bồn tắm"
+              style={{ width: "100%", padding: "9px 12px", border: `1.5px solid ${errors.amenities ? "#ef4444" : "#e8e0d0"}`, borderRadius: 8, fontFamily: "inherit", fontSize: 13, color: "#1a1510", background: errors.amenities ? "#fff5f5" : "#f5f0e8", outline: "none", boxSizing: "border-box" }}
+            />
+            {errors.amenities && <div style={{ fontSize: 11, color: "#ef4444", marginTop: 4 }}>{errors.amenities}</div>}
+          </div>
         </div>
 
         {/* Nút Hủy / Lưu */}
@@ -211,6 +242,9 @@ export default function ManageRoom() {
         status: r.status,
         amenities: r.amenities ?? [],
         roomTypeId: r.roomTypeId,
+        rawFloor: r.floor,
+        rawCapacity: r.capacity,
+        rawArea: r.area,
       })));
 
     } catch (err) {
@@ -261,15 +295,15 @@ export default function ManageRoom() {
 
     // Map field FE → DTO backend
     const dto = {
-      number: form.name.trim(),
-      floor: parseInt(form.floor) || 1,
-      capacity: parseInt(form.capacity) || 1,
-      bedType: form.bed.trim(),
-      area: parseFloat(form.area) || 1,
-      pricePerNight: parseInt(form.price) || 0,
-      status: form.status,
-      amenities: form.amenities || "",
-      roomTypeId: parseInt(form.roomTypeId) || 1,
+      Number: form.name.trim(),
+      Floor: parseInt(form.floor) || 1,
+      Capacity: parseInt(form.capacity) || 1,
+      BedType: form.bed.trim(),
+      Area: parseFloat(form.area) || 1,
+      PricePerNight: parseInt(form.price) || 0,
+      Status: form.status,
+      Amenities: form.amenities || "",
+      RoomTypeId: parseInt(form.roomTypeId) || 1,
     };
 
     try {
@@ -299,7 +333,24 @@ export default function ManageRoom() {
   // ── Đổi trạng thái ───────────────────────────────────────────────
   const changeStatus = async (id, newStatus) => {
     try {
-      await updateRoom(id, { status: newStatus }); // dùng PUT
+      const room = rooms.find(r => r.id === id);
+      if (!room) return;
+      
+      // Gửi đầy đủ dữ liệu phòng khi đổi trạng thái
+      const dto = {
+        Number: room.name,
+        Floor: parseInt(room.rawFloor) || 1,
+        Capacity: parseInt(room.rawCapacity) || 1,
+        BedType: room.bed,
+        Area: parseFloat(room.rawArea) || 1,
+        PricePerNight: parseInt(room.price) || 0,
+        Status: newStatus,
+        Amenities: Array.isArray(room.amenities) ? room.amenities.join(", ") : room.amenities || "",
+        RoomTypeId: parseInt(room.roomTypeId) || 1,
+      };
+      console.log("DEBUG changeStatus:", { room, dto });
+      
+      await updateRoom(id, dto);
       setRooms(rs =>
         rs.map(r => r.id === id ? { ...r, status: newStatus } : r)
       );
@@ -309,7 +360,7 @@ export default function ManageRoom() {
   };
 
   const openAdd = () => { setForm({ ...emptyForm, roomTypeId: roomTypes[0]?.id || "" }); setEditId(null); setErrors({}); setModalOpen(true); };
-  const openEdit = (room) => { setForm({ ...room, amenities: room.amenities.join(", ") }); setEditId(room.id); setErrors({}); setModalOpen(true); };
+  const openEdit = (room) => { setForm({ ...room, name: room.name, floor: room.rawFloor, capacity: room.rawCapacity, area: room.rawArea, amenities: Array.isArray(room.amenities) ? room.amenities.join(", ") : room.amenities || "" }); setEditId(room.id); setErrors({}); setModalOpen(true); };
   const closeModal = () => { setModalOpen(false); setErrors({}); };
 
   const filtered = rooms.filter(r => {

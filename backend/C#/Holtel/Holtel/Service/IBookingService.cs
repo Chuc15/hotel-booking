@@ -11,6 +11,6 @@ namespace Holtel.Service
 		Task<BookingResponseDto> Create(int userId, CreateBookingDto dto);
 		Task<BookingResponseDto> Update(int id, UpdateBookingDto dto);
 		Task Delete(int id);
-		
+		Task UpdateStatus(int id, string status);
 	}
 }

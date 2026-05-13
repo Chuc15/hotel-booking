@@ -11,7 +11,7 @@ namespace Holtel.Service
 		Task<PagedResult<UserDto>> GetAllUsersAsync(string? search, int page, int pageSize);
 		Task<UserDto> GetUserByIdAsync(int id);
 		Task UpdateUserStatusAsync(int id, UpdateUserStatusDto dto);
-		Task DeleteUser(int id);
+		Task<bool> DeleteUser(int id);
 		Task UpdateRole(int id, string newRole);
 	}
 }

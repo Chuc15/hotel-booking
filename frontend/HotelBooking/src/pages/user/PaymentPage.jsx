@@ -1,9 +1,12 @@
 import { useState } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
+import { useAuth } from '../../context/AuthContext';
 import Header from '../../components/layout/Header';
 import Footer from '../../components/layout/Footer';
 import '../../pages/AuthPages.css';
-
+import { createBooking } from '../../api/bookingApi';
+import { updateRoom, getRoomById } from '../../api/roomApi';
+import { createVnPayUrl } from '../../api/bookingApi';
 // VNP Configuration - Replace with your actual VNP settings
 const VNP_CONFIG = {
   vnp_Url: 'https://sandbox.vnpayment.vn/paymentv2/vpcpay.html',
@@ -13,10 +16,11 @@ const VNP_CONFIG = {
 };
 
 export default function PaymentPage() {
+  const { user } = useAuth();
   const location = useLocation();
   const navigate = useNavigate();
   const bookingData = location.state?.booking || null;
-  
+
   const [paymentMethod, setPaymentMethod] = useState('vnp');
   const [isProcessing, setIsProcessing] = useState(false);
   const [cardInfo, setCardInfo] = useState({
@@ -47,7 +51,7 @@ export default function PaymentPage() {
     const date = new Date();
     const createDate = date.toISOString().slice(0, 19).replace(/[-:T]/g, '');
     const orderId = `ORDER${Date.now()}`;
-    
+
     const vnp_Params = {
       vnp_Version: '2.1.0',
       vnp_Command: 'pay',
@@ -72,9 +76,9 @@ export default function PaymentPage() {
     const queryString = new URLSearchParams(sortedParams).toString();
     const hmacSHA512 = require('crypto').createHmac('sha512', VNP_CONFIG.vnp_HashSecret);
     const signed = hmacSHA512(queryString).digest('hex');
-    
+
     vnp_Params.vnp_SecureHash = signed;
-    
+
     const paymentUrl = `${VNP_CONFIG.vnp_Url}?${new URLSearchParams(vnp_Params).toString()}`;
     return paymentUrl;
   };
@@ -91,119 +95,77 @@ export default function PaymentPage() {
       'cash': 'Cash'
     };
 
-    const statusMap = {
-      'vnp': 'Completed',
-      'banking': 'Pending',
-      'momo': 'Completed',
-      'card': 'Completed',
-      'cash': 'Pending'
-    };
-
     try {
-      if (paymentMethod === 'vnp') {
-        // VNP Payment - In production, redirect to VNP URL
-        // For demo, we'll simulate the payment
-        await new Promise(resolve => setTimeout(resolve, 1500));
-        
-        // Update payment state
-        const transactionId = `VNP${Date.now()}`;
-        setPayment({
-          ...payment,
-          id: Math.floor(Math.random() * 1000) + 1,
-          bookingId: bookingData?.bookingId || Math.floor(Math.random() * 10000) + 1,
-          amount: bookingData?.pricing?.total || 0,
-          method: methodMap[paymentMethod],
-          transactionId: transactionId,
-          status: statusMap[paymentMethod],
-          paidAt: new Date().toISOString()
+      // Payload đặt phòng
+      const bookingPayload = {
+        userId: user?.id || user?.userId || null,
+        roomId: Number(bookingData.room.id),
+        roomName: bookingData.room.name,
+        checkInDate: bookingData.guestInfo.checkIn,
+        checkOutDate: bookingData.guestInfo.checkOut,
+        totalPrice: Number(bookingData.pricing.total),
+        guestName: bookingData.guestInfo.name,
+        guestPhone: bookingData.guestInfo.phone,
+        guestEmail: bookingData.guestInfo.email,
+        // Nếu là VNPay thì để Confirmed nhưng Status của Payment sẽ là Pending
+        status: (paymentMethod === 'vnp' || paymentMethod === 'card' || paymentMethod === 'momo') ? 'Confirmed' : 'Pending'
+      };
+
+      // 1. Tạo đơn đặt phòng trước
+      const newBooking = await createBooking(bookingPayload);
+      const bookingId = newBooking.id; // Lấy ID đơn vừa tạo
+
+      // 2. Cập nhật trạng thái phòng
+      try {
+        const fullRoom = await getRoomById(bookingData.room.id);
+        await updateRoom(bookingData.room.id, {
+          ...fullRoom,
+          status: "Đang sử dụng"
         });
-        
-        // In real implementation:
-        // const paymentUrl = createVNPPayment();
-        // window.location.href = paymentUrl;
-        
-        alert(`Thanh toán qua VNPay thành công! Mã giao dịch: ${transactionId}`);
-        navigate('/');
-      } else if (paymentMethod === 'banking') {
-        await new Promise(resolve => setTimeout(resolve, 1500));
-        
-        const transactionId = `BANK${Date.now()}`;
-        setPayment({
-          ...payment,
-          id: Math.floor(Math.random() * 1000) + 1,
-          bookingId: bookingData?.bookingId || Math.floor(Math.random() * 10000) + 1,
-          amount: bookingData?.pricing?.total || 0,
-          method: methodMap[paymentMethod],
-          transactionId: transactionId,
-          status: statusMap[paymentMethod],
-          paidAt: null
-        });
-        
-        alert(`Thanh toán chuyển khoản thành công! Mã giao dịch: ${transactionId}. Vui lòng kiểm tra email xác nhận.`);
-        navigate('/');
-      } else if (paymentMethod === 'momo') {
-        await new Promise(resolve => setTimeout(resolve, 1500));
-        
-        const transactionId = `MOMO${Date.now()}`;
-        setPayment({
-          ...payment,
-          id: Math.floor(Math.random() * 1000) + 1,
-          bookingId: bookingData?.bookingId || Math.floor(Math.random() * 10000) + 1,
-          amount: bookingData?.pricing?.total || 0,
-          method: methodMap[paymentMethod],
-          transactionId: transactionId,
-          status: statusMap[paymentMethod],
-          paidAt: new Date().toISOString()
-        });
-        
-        alert(`Thanh toán qua MoMo thành công! Mã giao dịch: ${transactionId}`);
-        navigate('/');
-      } else if (paymentMethod === 'card') {
-        await new Promise(resolve => setTimeout(resolve, 1500));
-        
-        const transactionId = `CARD${Date.now()}`;
-        setPayment({
-          ...payment,
-          id: Math.floor(Math.random() * 1000) + 1,
-          bookingId: bookingData?.bookingId || Math.floor(Math.random() * 10000) + 1,
-          amount: bookingData?.pricing?.total || 0,
-          method: methodMap[paymentMethod],
-          transactionId: transactionId,
-          status: statusMap[paymentMethod],
-          paidAt: new Date().toISOString()
-        });
-        
-        alert(`Thanh toán thẻ quốc tế thành công! Mã giao dịch: ${transactionId}`);
-        navigate('/');
-      } else {
-        await new Promise(resolve => setTimeout(resolve, 1500));
-        
-        const transactionId = `CASH${Date.now()}`;
-        setPayment({
-          ...payment,
-          id: Math.floor(Math.random() * 1000) + 1,
-          bookingId: bookingData?.bookingId || Math.floor(Math.random() * 10000) + 1,
-          amount: bookingData?.pricing?.total || 0,
-          method: methodMap[paymentMethod],
-          transactionId: transactionId,
-          status: statusMap[paymentMethod],
-          paidAt: null
-        });
-        
-        alert(`Đặt phòng thành công! Mã đơn: ${transactionId}. Vui lòng thanh toán tại quầy.`);
-        navigate('/');
+      } catch (roomErr) {
+        console.error("Room status update failed:", roomErr);
       }
+
+      // 3. XỬ LÝ RIÊNG CHO VNPAY
+      if (paymentMethod === 'vnp') {
+        const paymentPayload = {
+          bookingId: bookingId,
+          amount: Number(bookingData.pricing.total),
+          method: "VNPay",
+          status: "Pending",
+          transactionId: "N/A"
+        };
+
+        const response = await createVnPayUrl(paymentPayload);
+        if (response && response.paymentUrl) {
+          // Chuyển hướng sang trang VNPay
+          window.location.href = response.paymentUrl;
+          return; // Kết thúc tại đây
+        }
+      }
+
+      // 4. Các phương thức khác (Tiền mặt, Chuyển khoản...)
+      const transactionId = `${paymentMethod.toUpperCase()}${Date.now()}`;
+      const msg = paymentMethod === 'cash'
+        ? `Đặt phòng thành công! Mã đơn: ${transactionId}. Vui lòng thanh toán tại quầy.`
+        : `Thanh toán qua ${methodMap[paymentMethod]} thành công! Mã giao dịch: ${transactionId}`;
+
+      alert(msg);
+      navigate('/');
+
     } catch (error) {
-      alert('Có lỗi xảy ra. Vui lòng thử lại!');
+      console.error("Booking error:", error);
+      alert('Có lỗi xảy ra trong quá trình đặt phòng. Vui lòng thử lại!');
     } finally {
       setIsProcessing(false);
     }
   };
 
+
   return (
     <div className="home-wrap">
       <Header />
-      
+
       {/* Page Header */}
       <section className="mt-page-header">
         <h1>Thanh toán</h1>
@@ -216,13 +178,13 @@ export default function PaymentPage() {
           {/* Payment Methods */}
           <div className="mt-payment-methods">
             <h2>Phương thức thanh toán</h2>
-            
+
             <div className="mt-method-options">
               <label className={`mt-method-option ${paymentMethod === 'vnp' ? 'active' : ''}`}>
-                <input 
-                  type="radio" 
-                  name="payment" 
-                  value="vnp" 
+                <input
+                  type="radio"
+                  name="payment"
+                  value="vnp"
                   checked={paymentMethod === 'vnp'}
                   onChange={(e) => setPaymentMethod(e.target.value)}
                 />
@@ -234,10 +196,10 @@ export default function PaymentPage() {
               </label>
 
               <label className={`mt-method-option ${paymentMethod === 'banking' ? 'active' : ''}`}>
-                <input 
-                  type="radio" 
-                  name="payment" 
-                  value="banking" 
+                <input
+                  type="radio"
+                  name="payment"
+                  value="banking"
                   checked={paymentMethod === 'banking'}
                   onChange={(e) => setPaymentMethod(e.target.value)}
                 />
@@ -249,9 +211,9 @@ export default function PaymentPage() {
               </label>
 
               <label className={`mt-method-option ${paymentMethod === 'momo' ? 'active' : ''}`}>
-                <input 
-                  type="radio" 
-                  name="payment" 
+                <input
+                  type="radio"
+                  name="payment"
                   value="momo"
                   checked={paymentMethod === 'momo'}
                   onChange={(e) => setPaymentMethod(e.target.value)}
@@ -264,9 +226,9 @@ export default function PaymentPage() {
               </label>
 
               <label className={`mt-method-option ${paymentMethod === 'card' ? 'active' : ''}`}>
-                <input 
-                  type="radio" 
-                  name="payment" 
+                <input
+                  type="radio"
+                  name="payment"
                   value="card"
                   checked={paymentMethod === 'card'}
                   onChange={(e) => setPaymentMethod(e.target.value)}
@@ -279,9 +241,9 @@ export default function PaymentPage() {
               </label>
 
               <label className={`mt-method-option ${paymentMethod === 'cash' ? 'active' : ''}`}>
-                <input 
-                  type="radio" 
-                  name="payment" 
+                <input
+                  type="radio"
+                  name="payment"
                   value="cash"
                   checked={paymentMethod === 'cash'}
                   onChange={(e) => setPaymentMethod(e.target.value)}
@@ -373,6 +335,12 @@ export default function PaymentPage() {
               <span>Giá phòng</span>
               <span>{formatPrice(bookingData?.pricing?.roomPrice || 0)}</span>
             </div>
+            {bookingData?.pricing?.discount > 0 && (
+              <div className="mt-summary-item" style={{ color: '#C0392B' }}>
+                <span>Khuyến mãi</span>
+                <span>-{formatPrice(bookingData?.pricing?.discount)}</span>
+              </div>
+            )}
             <div className="mt-summary-item">
               <span>Thuế & phí (10%)</span>
               <span>{formatPrice(bookingData?.pricing?.tax || 0)}</span>
@@ -381,7 +349,7 @@ export default function PaymentPage() {
               <span>Tổng cộng</span>
               <strong>{formatPrice(bookingData?.pricing?.total || 0)}</strong>
             </div>
-            
+
             {/* Payment Details Display */}
             {payment.transactionId && (
               <div className="mt-payment-details">
@@ -412,9 +380,9 @@ export default function PaymentPage() {
                 )}
               </div>
             )}
-            
-            <button 
-              className="home-btn-gold mt-submit-btn" 
+
+            <button
+              className="home-btn-gold mt-submit-btn"
               onClick={handlePayment}
               disabled={isProcessing}
             >

@@ -14,7 +14,7 @@
 		public double Area { get; set; }            // Diện tích (m²)
 		public decimal PricePerNight { get; set; }  // Giá / đêm
 		public string? Amenities { get; set; }      // Tiện nghi (lưu dạng "Wifi,TV,Điều hòa")
-
+		public bool IsDeleted { get; set; } = false;
 		// Navigation
 		public RoomType RoomType { get; set; } = null!;
 		public ICollection<Booking> Bookings { get; set; } = new List<Booking>();

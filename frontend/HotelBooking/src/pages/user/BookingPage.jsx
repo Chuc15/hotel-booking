@@ -32,11 +32,23 @@ export default function BookingPage() {
   };
 
   const calculateTotal = () => {
-    if (!selectedRoom) return 0;
+    if (!selectedRoom) return { roomPrice: 0, discount: 0, tax: 0, total: 0 };
     const nights = calculateNights();
-    const roomPrice = selectedRoom.price * rooms * nights;
-    const tax = roomPrice * 0.1;
-    return { roomPrice, tax, total: roomPrice + tax };
+    const basePrice = selectedRoom.price * rooms * nights;
+    
+    // Discount logic
+    let discountPercent = 0;
+    if (formData.promotion === 'early') discountPercent = 0.10;
+    else if (formData.promotion === 'weekend') discountPercent = 0.15;
+    else if (formData.promotion === 'vip') discountPercent = 0.20;
+    else if (formData.promotion === 'newyear') discountPercent = 0.25;
+    
+    const discountAmount = basePrice * discountPercent;
+    const roomPriceAfterDiscount = basePrice - discountAmount;
+    const tax = roomPriceAfterDiscount * 0.1;
+    const total = roomPriceAfterDiscount + tax;
+    
+    return { roomPrice: basePrice, discount: discountAmount, tax, total };
   };
 
   const handleChange = (e) => {
@@ -178,6 +190,12 @@ export default function BookingPage() {
               <span>Giá phòng</span>
               <span>{formatPrice(calculateTotal().roomPrice)}</span>
             </div>
+            {calculateTotal().discount > 0 && (
+              <div className="mt-summary-item" style={{ color: '#C0392B' }}>
+                <span>Khuyến mãi</span>
+                <span>-{formatPrice(calculateTotal().discount)}</span>
+              </div>
+            )}
             <div className="mt-summary-item">
               <span>Thuế & phí (10%)</span>
               <span>{formatPrice(calculateTotal().tax)}</span>
@@ -268,17 +286,24 @@ export default function BookingPage() {
               </div>
               <div className="mt-form-group">
                 <label>Khuyến mãi</label>
-                <select 
-                  name="promotion"
-                  value={formData.promotion}
-                  onChange={handleChange}
-                >
-                  <option value="">Chọn khuyến mãi</option>
-                  <option value="early">Giảm 10% đặt sớm</option>
-                  <option value="weekend">Giảm 15% cuối tuần</option>
-                  <option value="vip">Giảm 20% khách VIP</option>
-                  <option value="newyear">Giảm 25% Tết Nguyên Đán</option>
-                </select>
+                <div className="promotion-wrapper">
+                  <select 
+                    name="promotion"
+                    value={formData.promotion}
+                    onChange={handleChange}
+                  >
+                    <option value="">Chọn khuyến mãi</option>
+                    <option value="early">Giảm 10% đặt sớm</option>
+                    <option value="weekend">Giảm 15% cuối tuần</option>
+                    <option value="vip">Giảm 20% khách VIP</option>
+                    <option value="newyear">Giảm 25% Tết Nguyên Đán</option>
+                  </select>
+                  {calculateTotal().discount > 0 && (
+                    <div className="promo-preview-badge">
+                      Tiết kiệm: {formatPrice(calculateTotal().discount)}
+                    </div>
+                  )}
+                </div>
               </div>
             </div>
 

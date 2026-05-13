@@ -25,6 +25,8 @@ namespace Holtel.Application.Mappings
 						? new List<string>()
 						: src.Amenities.Split(',', StringSplitOptions.TrimEntries).ToList()));
 			CreateMap<CreateRoomDto, Room>();
+			CreateMap<UpdateRoomDto, Room>();
+		
 			// AutoMapperProfile.cs — thêm vào
 			CreateMap<RoomType, RoomTypeDto>()
 				.ForMember(dest => dest.Amenities,

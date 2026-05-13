@@ -1,5 +1,6 @@
 import { useState, useEffect, useRef } from "react";
-import { getBookings, updateBooking, deleteBooking } from "../../api/bookingApi";
+import { getBookings, updateBooking, deleteBooking, updateBookingStatus } from "../../api/bookingApi";
+import { getRoomById, updateRoom } from "../../api/roomApi";
 
 const ALL_STATUSES = ["Pending", "Confirmed", "Cancelled", "Completed"];
 
@@ -29,9 +30,15 @@ function formatDate(dateStr) {
   return d.toLocaleDateString("vi-VN", { day: '2-digit', month: '2-digit', year: 'numeric' });
 }
 
-function StatusDropdown({ bookingId, currentStatus, onChangeStatus }) {
+function StatusDropdown({ bookingId, currentStatus, onChangeStatus, index, total }) {
   const [open, setOpen] = useState(false);
   const ref = useRef(null);
+
+  // Mở lên trên nếu là các mục cuối danh sách để tránh bị che
+  const isLastItems = total > 3 && index >= total - 2;
+  const dropdownStyle = isLastItems 
+    ? { bottom: "calc(100% + 6px)", right: 0 } 
+    : { top: "calc(100% + 6px)", right: 0 };
 
   useEffect(() => {
     const handler = (e) => { if (ref.current && !ref.current.contains(e.target)) setOpen(false); };
@@ -48,7 +55,7 @@ function StatusDropdown({ bookingId, currentStatus, onChangeStatus }) {
         Trạng thái <span style={{ fontSize: 10 }}>▾</span>
       </button>
       {open && (
-        <div style={{ position: "absolute", bottom: "calc(100% + 6px)", right: 0, background: "#fff", border: "1.5px solid #e8e0d0", borderRadius: 10, boxShadow: "0 8px 24px rgba(0,0,0,0.12)", zIndex: 50, minWidth: 140, overflow: "hidden" }}>
+        <div style={{ position: "absolute", ...dropdownStyle, background: "#fff", border: "1.5px solid #e8e0d0", borderRadius: 10, boxShadow: "0 8px 24px rgba(0,0,0,0.12)", zIndex: 100, minWidth: 140, overflow: "hidden" }}>
           {ALL_STATUSES.map(s => (
             <div
               key={s}
@@ -77,17 +84,26 @@ export default function ManageBookings() {
       setLoading(true);
       const data = await getBookings({ page: 1, pageSize: 100 });
       const bArray = Array.isArray(data) ? data : data.data || data.items || [];
-      
-      setBookings(bArray.map(b => ({
-        id: b.id,
-        guestName: b.guestName || b.user?.fullName || b.customerName || "Khách",
-        guestPhone: b.guestPhone || b.user?.phoneNumber || "N/A",
-        roomName: b.roomName || b.room?.number || "N/A",
-        checkIn: b.checkInDate || b.checkIn,
-        checkOut: b.checkOutDate || b.checkOut,
-        totalPrice: b.totalPrice || b.amount || 0,
-        status: b.status || "Pending",
-      })));
+
+      setBookings(bArray.map(b => {
+        const roomObj = b.room || b.Room;
+        const userObj = b.user || b.User;
+        return {
+          id: b.id || b.Id,
+          // Tên khách hàng: ưu tiên guestName, sau đó tới fullName từ object User
+          guestName: b.guestName || b.GuestName || userObj?.fullName || userObj?.FullName || b.customerName || b.CustomerName || b.userName || b.UserName || "Khách",
+          guestPhone: b.guestPhone || b.GuestPhone || userObj?.phoneNumber || userObj?.PhoneNumber || "N/A",
+          guestEmail: b.guestEmail || b.GuestEmail || userObj?.email || userObj?.Email || "",
+          // Tên phòng: ưu tiên roomName, sau đó tới number từ object Room
+          roomName: b.roomName || b.RoomName || roomObj?.number || roomObj?.Number || b.roomNumber || b.RoomNumber || "N/A",
+          roomId: b.roomId || b.RoomId || roomObj?.id || roomObj?.Id,
+          room: roomObj,
+          checkIn: b.checkInDate || b.CheckInDate || b.checkIn || b.CheckIn,
+          checkOut: b.checkOutDate || b.CheckOutDate || b.checkOut || b.CheckOut,
+          totalPrice: b.totalPrice || b.TotalPrice || b.amount || b.Amount || 0,
+          status: b.status || b.Status || "Pending",
+        };
+      }));
     } catch (err) {
       console.log(err);
       alert("Lấy danh sách đặt phòng thất bại");
@@ -100,10 +116,48 @@ export default function ManageBookings() {
     fetchBookings();
   }, []);
 
+  const syncRoomStatus = async (roomId, bookingStatus) => {
+    if (!roomId) return;
+    try {
+      const room = await getRoomById(roomId);
+      if (!room) return;
+
+      let newRoomStatus = room.status;
+      if (bookingStatus === "Confirmed") {
+        newRoomStatus = "Đang sử dụng";
+      } else if (bookingStatus === "Cancelled" || bookingStatus === "Completed") {
+        newRoomStatus = "Trống";
+      }
+
+      if (newRoomStatus !== room.status) {
+        const dto = {
+          Number: room.number,
+          Floor: room.floor,
+          Capacity: room.capacity,
+          BedType: room.bedType,
+          Area: room.area,
+          PricePerNight: room.pricePerNight,
+          Status: newRoomStatus,
+          Amenities: Array.isArray(room.amenities) ? room.amenities.join(", ") : (room.amenities || ""),
+          RoomTypeId: room.roomTypeId,
+        };
+        await updateRoom(roomId, dto);
+      }
+    } catch (err) {
+      console.error("Sync room status failed:", err);
+    }
+  };
+
   const changeStatus = async (id, newStatus) => {
     try {
-      await updateBooking(id, { status: newStatus });
+      // Sử dụng API mới cập nhật trạng thái (PATCH)
+      await updateBookingStatus(id, newStatus);
       setBookings(bs => bs.map(b => b.id === id ? { ...b, status: newStatus } : b));
+      
+      const booking = bookings.find(b => b.id === id);
+      if (booking?.roomId) {
+        await syncRoomStatus(booking.roomId, newStatus);
+      }
     } catch (err) {
       alert("Đổi trạng thái thất bại: " + err);
     }
@@ -112,7 +166,14 @@ export default function ManageBookings() {
   const deleteBookingHandler = async (id) => {
     if (!window.confirm("Xóa đơn đặt phòng này?")) return;
     try {
+      const booking = bookings.find(b => b.id === id);
       await deleteBooking(id);
+      
+      // Khi xóa đặt phòng, chuyển phòng thành trống
+      if (booking?.roomId) {
+        await syncRoomStatus(booking.roomId, "Cancelled");
+      }
+      
       setBookings(bs => bs.filter(b => b.id !== id));
     } catch (err) {
       alert("Xóa thất bại: " + err);
@@ -173,7 +234,7 @@ export default function ManageBookings() {
       </div>
 
       {/* Bookings List (Table-like grid) */}
-      <div style={{ background: "#fff", borderRadius: 16, border: "1.5px solid #e8e0d0", overflow: "hidden" }}>
+      <div style={{ background: "#fff", borderRadius: 16, border: "1.5px solid #e8e0d0", overflow: "visible", position: "relative" }}>
         <div style={{ display: "grid", gridTemplateColumns: "1.5fr 1fr 1.5fr 1fr 1fr 1fr", padding: "16px 20px", background: "#f5f0e8", borderBottom: "1.5px solid #e8e0d0", fontSize: 12.5, fontWeight: 700, color: "#7a6e62" }}>
           <div>KHÁCH HÀNG</div>
           <div>PHÒNG</div>
@@ -190,6 +251,7 @@ export default function ManageBookings() {
               <div>
                 <div style={{ fontWeight: 700, marginBottom: 4 }}>{b.guestName}</div>
                 <div style={{ color: "#7a6e62", fontSize: 12 }}>{b.guestPhone}</div>
+                {b.guestEmail && <div style={{ color: "#7a6e62", fontSize: 11, fontStyle: "italic" }}>{b.guestEmail}</div>}
               </div>
               <div style={{ fontWeight: 600, color: "#c9920a" }}>{b.roomName}</div>
               <div style={{ color: "#7a6e62", fontSize: 12.5, lineHeight: 1.5 }}>
@@ -199,7 +261,13 @@ export default function ManageBookings() {
               <div style={{ fontWeight: 700 }}>{formatPrice(b.totalPrice)}</div>
               <div><StatusBadge status={b.status} /></div>
               <div style={{ display: "flex", gap: 10, justifyContent: "flex-end", alignItems: "center" }}>
-                <StatusDropdown bookingId={b.id} currentStatus={b.status} onChangeStatus={changeStatus} />
+                <StatusDropdown 
+                  bookingId={b.id} 
+                  currentStatus={b.status} 
+                  onChangeStatus={changeStatus} 
+                  index={i} 
+                  total={filtered.length} 
+                />
                 <button onClick={() => deleteBookingHandler(b.id)} style={{ padding: "6px", border: "none", borderRadius: 8, background: "#fee2e2", color: "#dc2626", cursor: "pointer", fontSize: 14 }}>
                   🗑
                 </button>

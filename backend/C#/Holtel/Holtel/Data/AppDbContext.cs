@@ -29,7 +29,7 @@ namespace Holtel.Data
 			IsActive = true,
 			CreatedAt = DateTime.UtcNow
 			}
-		);// aba11 @gmail.com Ab@00000
+		);//llla11@gmail.com Ab@11111
 
 			mb.Entity<Booking>()
 				.HasIndex(b => new { b.RoomId, b.CheckIn, b.CheckOut });
